@@ -10,8 +10,8 @@ class Matriz
 {
   public:
     carregar(std::string arquivo, std::string ompSettings);
-    BFS(int inicio, std::string outputName, bool log);
-    DFS(int inicio, std::string outputName, bool log);
+    BFS(int inicio, std::string outputName, bool logFile);
+    DFS(int inicio, std::string outputName, bool logFile);
     geraEstatisticas(std::string fileName);
   protected:
 

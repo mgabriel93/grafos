@@ -1,3 +1,4 @@
+#include <bits/stdc++.h>
 #include <omp.h>
 #include <time.h>
 #include "Lista.h"
@@ -11,6 +12,10 @@
 //TODO:
 
 using namespace std;
+
+typedef pair<int, int> par;
+
+
 
 Lista::bubbleSort(std::vector < vector < int> > &lista, int tamanho) //Ordena um vetor por bubblesort, começando por i = 1
 {
@@ -46,10 +51,16 @@ Lista::carregar(std::string arquivo)
     linhaInt >> nVertices;
     vertMax = nVertices+1; //Índice para auxiliar loops e matrizes
     listaAdj.resize(vertMax); //Redimensiona a lista
+    if (true == true)
+    {
+      listaPesos.resize(vertMax);
+      negativo = false;
+    }
 
     for (int i = 1; i <= nVertices; i++)
     {
       listaAdj[i].push_back(i); //Adiciona um vértice do elemento para ele mesmo. Pode ser útil no futuro, e evita bugs com índice 0
+      listaPesos[i].push_back(i); //Adiciona um vértice do elemento para ele mesmo. Pode ser útil no futuro, e evita bugs com índice 0
     }
 
     //Inicializa a Lista e redimensiona os vértices
@@ -59,14 +70,25 @@ Lista::carregar(std::string arquivo)
     //Preenche a Lista conforme o arquivo
 
     int v, a;
-    while (inFile >> v >> a)
+    float w;
+
+    while (inFile >> v >> a >> w)
     {
       //Adiciona a aresta ao vetor
       if(v <= vertMax && a <= vertMax)
       {
+        nArestas++;
         listaAdj[v].push_back(a);
         listaAdj[a].push_back(v);
-        nArestas++;
+        if (w >= 0)
+        {
+          listaPesos[v].push_back(w);
+          listaPesos[a].push_back(w);
+        }
+        else
+        {
+          negativo = true;
+        }
       }
     }
     // cout << "Lista carregada com sucesso!" << endl;
@@ -74,7 +96,7 @@ Lista::carregar(std::string arquivo)
   inFile.close();
 }
 
-Lista::BFS(int inicio, std::string outputName, bool log)
+Lista::BFS(int inicio, std::string outputName, bool logFile)
 {
   std::vector <bool> explorados(vertMax, false);
 
@@ -90,7 +112,7 @@ Lista::BFS(int inicio, std::string outputName, bool log)
   fila.push_back(inicio); //Adiciona o vértice inicial à fila
 
   ofstream output;
-  if(log == true)
+  if(logFile == true)
   {
     output.open((outputName+".csv").c_str()); //Inicializa o arquivo
     output << "Vertice;Pai;Grau" << endl; //Adiciona o título
@@ -117,7 +139,7 @@ Lista::BFS(int inicio, std::string outputName, bool log)
         nivel[w] = nivel[v] + 1; //O nível dele será o nível de quem descobiru ele +1
         pai[w] = v; //O pai dele será quem o descobriu
 
-        if (log == true)
+        if (logFile == true)
         {
           output << w << ";" << pai[w] << ";" << nivel[w] << endl; //Adiciona a linha no arquivo
         }
@@ -125,14 +147,14 @@ Lista::BFS(int inicio, std::string outputName, bool log)
     }
   }
 
-  if (log == true)
+  if (logFile == true)
   {
     output.close(); //Fecha o arquivo
   }
   // cout << "BFS executada com sucesso!" << endl;
 }
 
-Lista::DFS(int inicio, std::string outputName, bool log)
+Lista::DFS(int inicio, std::string outputName, bool logFile)
 {
   std::vector <bool> explorados(vertMax, false); //Cria a lista de vértices explorados
 
@@ -152,7 +174,7 @@ Lista::DFS(int inicio, std::string outputName, bool log)
   inicioStr << inicio; //Dá cast para string.....
 
   ofstream output;
-  if(log == true)
+  if(logFile == true)
   {
     output.open((outputName+".csv").c_str()); //Inicializa o arquivo
     output << "Vertice;Pai;Grau" << endl; //Adiciona o título
@@ -177,14 +199,14 @@ Lista::DFS(int inicio, std::string outputName, bool log)
         fila.push_back(w);
         nivel[w] = nivel[v] + 1; //O nível dele será o nível de quem descobiru ele +1
         pai[w] = v; //O pai dele será quem o descobriu
-        if (log == true)
+        if (logFile == true)
         {
           output << w << ";" << pai[w] << ";" << nivel[w] << endl; //Adiciona a linha no arquivo
         }
       }
     }
   }
-  if (log == true)
+  if (logFile == true)
   {
     output.close(); //Fecha o arquivo
   }
@@ -310,7 +332,7 @@ Lista::componentes(std::string outputName)
 
   ofstream outputComponentes;
   outputComponentes.open((outputName+"_componentes.txt").c_str());
-
+  cout << nComponentes << endl;
   //Imprime os elementos no arquivo de saída
   for (int i = 1; i <= nComponentes; i++)
   {
@@ -407,4 +429,184 @@ Lista::diametro(string outputName)
   outputDiametro << "Diametro do grafo: " << diametro << endl;
   outputDiametro << "Tempo de execucao: " << (clock() - tInicio)/(CLOCKS_PER_SEC/1000) << " ms" << endl;
   outputDiametro.close();
+}
+
+Lista::caminho(int in)
+{
+  cout << distOrigem[in] << " - ";
+  while (in != pai[in])
+  {
+    cout << in << " ";
+    in = pai[in];
+  }
+  cout << in << endl;
+}
+
+Lista::Pesos(int inicio, bool logFile, bool mst = false)
+{
+
+  std::vector <bool> explorados(vertMax, false);
+  std::vector <float> distancia(vertMax, 10000);
+
+  distancia[inicio] = 0;
+  pai.clear(); //Limpa a lista de pais
+  pai.resize(vertMax); //Redimensiona a lista conforme necessário
+  pai[inicio] = inicio; //Coloca o pai do vértice inicial como ele mesmo
+
+  distOrigem.resize(vertMax); //Redimensiona a lista conforme necessário
+
+  priority_queue< par, vector <par> , greater<par> > fila;
+
+  fila.push(make_pair(distancia[inicio], inicio));
+
+  while (!fila.empty())
+  {
+    int u;
+    u = fila.top().second; //Pega o vértice atual
+    fila.pop();  //Remove o vértice atual da fila
+
+    explorados[u] = true;
+    distOrigem[u] = distancia[u];
+
+    for (int i = 1; i <= listaAdj[u].size()-1; i++) //Varre o array de vértices
+    {
+
+      int v;
+      float pesoUV;
+      v = listaAdj[u][i];
+      pesoUV = listaPesos[u][i];
+
+      if (explorados[v] == false)
+      {
+        if (mst == false)
+        //Dijkstra
+        {
+          if(distancia[v] > (distancia[u] + pesoUV))
+          {
+            distancia[v] = distancia[u] + pesoUV;
+            fila.push(make_pair(distancia[v], v));
+            pai[v] = u;
+            // cout << u << " " << listaAdj[u][i] << " " << distancia[u] << endl; //Debug
+          }
+        }
+        else
+        //Prim
+        {
+          if(distancia[v] > pesoUV)
+          {
+            distancia[v] = pesoUV;
+            fila.push(make_pair(distancia[v], v));
+            pai[v] = u;
+          }
+        }
+      }
+    }
+  }
+}
+
+Lista::excentricidade()
+{
+  float distMax = 0;
+  for(int i= 1; i <= nVertices; i++)
+  {
+    if (distOrigem[i] > distMax)
+    {
+      distMax = distOrigem[i];
+    }
+  }
+  cout << distMax << endl;
+}
+
+Lista::minimumSpanningTree()
+{
+  ofstream output;
+  output.open("runlog.txt");
+
+  int peso = 0;
+  for (int i = 1; i <= nVertices; i++)
+  {
+    output << pai[i] << " " << i << " " << distOrigem[i] << endl;
+    peso = peso + distOrigem[i];
+  }
+  output.close();
+  cout << peso << endl;;
+}
+
+Lista::distanciaMedia()
+{
+  double soma;
+  int counter = 0;
+  for (int i=1; i <= nVertices; i++)
+  {
+      Pesos(i, false);
+      for (int i = 1; i <= nVertices; i++)
+      {
+        soma = soma + distOrigem[i];
+        counter++;
+      }
+  }
+
+  cout << "Distancia media: " << soma/counter << endl;
+}
+
+Lista::maiorGrau(int quant)
+{
+  std::vector <int> grau(vertMax, 0);
+
+  for (int i = 1; i <= nVertices; i++)
+  {
+    grau[pai[i]]++;
+    grau[i]++;
+  }
+
+  for (int i = 1; i <= quant; i++)
+  {
+    int max = *std::max_element(grau.begin(), grau.end());
+    int temp = 0;
+    int it = 0;
+    while (temp != max)
+    {
+      temp = grau[it];
+      it++;
+    }
+    cout << it-1 << " " << grau[it-1] << endl;
+    grau[it-1] = 0;
+  }
+}
+
+Lista::vizinhos(int vert)
+{
+  cout << pai[vert] << endl;
+  for(int i = 1; i <= nVertices; i++)
+  {
+    if(pai[i] == vert)
+    {
+      cout << i << endl;
+    }
+  }
+}
+
+Lista::buscaNomes(std::string pesquisador)
+{
+  // string inputFile = "rede_colaboracao_vertices.txt";
+  // std::ifstream inFile(inputFile.c_str());
+  // vector<std::string> listaNomes;
+  //
+  // listaNomes.push_back(" ");
+  //
+  // if (inFile.is_open())
+  // {
+  //
+  //   int v;
+  //   string nome;
+  //
+  //   while (inFile.good())
+  //   {
+  //     getline(inFile, v, ',');
+  //     getline(inFile, nome, '\n');
+  //     listaNomes.push_back(nome);
+  //     cout << v << "/" << listaNomes[v] << endl;
+  //   }
+  // }
+  // inFile.close();
 }

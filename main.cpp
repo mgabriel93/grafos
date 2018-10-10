@@ -16,17 +16,17 @@ using namespace std;
 
 //true = entrada manual. false = pega pelas const abaixo
 const bool inOverride = false;
-const bool log = false;
+const bool logFile = false;
 const bool runBFS = true;
 const bool runDFS = false;
 //nome do arquivo padrão
-const string arquivoDefault = "as_graph";
+const string arquivoDefault = "grafo_1";
 
 //1 = matriz, 2 = lista, qualquer outra coisa = pula direto para as calcular as componentes
-const string estruturaDefault = "1";
+const string estruturaDefault = "2";
 
 //1 para paralelizar o carregamento de matriz em memória, 2 para rodar uma bfs em cada thread, qualquer outra coisa para rodar single
-//     OBSERVAÇÕES: PARA UM LOG PRECISO, UTILIZAR 1 (Paralelizar apenas o carregamento de matriz)
+//     OBSERVAÇÕES: PARA UM logFile PRECISO, UTILIZAR 1 (Paralelizar apenas o carregamento de matriz)
 //     CAUTION: CADA BFS IRÁ ALOCAR SEU PRÓPRIO ESPAÇO EM MEMÓRIA!
 const string ompDefault = "1";
 //1 para calcular as componentes conexas, qualquer outra coisa para fechar direto
@@ -42,6 +42,46 @@ const int vMax = 1;
 
 int main()
 {
+
+  Lista lista;
+  clock_t tOpen = clock();
+
+/*  for (int i = 1; i <= 100; i++)
+  {
+    lista.Pesos(i, false, false);
+    lista.excentricidade();
+  }*/
+  // 2722,Edsger W. Dijkstra
+  // 11365,Alan M. Turing
+  // 471365,J. B. Kruskal
+  // 5709,Jon M. Kleinberg
+  // 11386,Éva Tardos
+  // 343930,Daniel R. Figueiredo
+
+  // lista.buscaNomes("123");
+
+  // lista.carregar("rede_colaboracao");
+  lista.carregar("grafo_1");
+  lista.Pesos(1, false, true);
+
+  lista.maiorGrau(3);
+  // lista.Pesos(343930, false, true);
+  // lista.vizinhos(343930);
+  // lista.caminho(11365);
+  // lista.caminho(471365);
+  // lista.caminho(11365);
+  // lista.caminho(5709);
+  // lista.caminho(11386);
+  // lista.caminho(343930);
+  // lista.minimumSpanningTree();
+  // lista.distanrciaMedia();
+
+  cout << "Tempo de execução: " << (clock() - tOpen)/(CLOCKS_PER_SEC/1000) << " ms" << endl;
+
+
+  // lista.maiorGrau(1);
+
+  /*
   //Define o arquivo de entrada
   string inputFile;
   if (inOverride == true)
@@ -89,7 +129,7 @@ int main()
 
 
   ofstream openTime;
-  openTime.open("run_log.txt");
+  openTime.open("run_logFile.txt");
   clock_t tOpen = clock();
 
   //Caso o usuário escolha MATRIZ:
@@ -106,7 +146,7 @@ int main()
 
     //Inicia o timer
     ofstream executionTime;
-    executionTime.open((inputFile+"_log_matrizAdj.txt").c_str());
+    executionTime.open((inputFile+"_logFile_matrizAdj.txt").c_str());
     executionTime << "Tempo para iniciar o vetor: " << (clock() - tInicio)/(CLOCKS_PER_SEC/1000) << " ms" << endl;
 
     //BFS e DFS para cada ponto. Roda em paralelo caso seja escolhida a opção 2
@@ -123,8 +163,8 @@ int main()
         {
           tInicio = clock();
           // cout << "Iniciando a BFS em matriz com inicio no vertice " << i << endl;
-          matriz.BFS(i, (inputFile+"_DFS_MatrizAdj_"+nomeSaida.str()).c_str(), log);
-          if (log == true)
+          matriz.BFS(i, (inputFile+"_DFS_MatrizAdj_"+nomeSaida.str()).c_str(), logFile);
+          if (logFile == true)
           {
             matriz.geraEstatisticas((inputFile+"_BFS_"+nomeSaida.str()).c_str());
             executionTime << "Tempo para rodar a BFS a partir do vértice " << i << ": " << (clock() - tInicio)/(CLOCKS_PER_SEC/1000) << " ms" << endl;
@@ -136,8 +176,8 @@ int main()
         {
           tInicio = clock();
           // cout << "Iniciando a DFS em matriz com inicio no vertice " << i << endl;
-          matriz.DFS(i, (inputFile+"_DFS_MatrizAdj_"+nomeSaida.str()).c_str(), log);
-          if (log == true)
+          matriz.DFS(i, (inputFile+"_DFS_MatrizAdj_"+nomeSaida.str()).c_str(), logFile);
+          if (logFile == true)
           {
             matriz.geraEstatisticas((inputFile+"_DFS_"+nomeSaida.str()).c_str());
             executionTime << "Tempo para rodar a DFS a partir do vértice " << i << ": " << (clock() - tInicio)/(CLOCKS_PER_SEC/1000) << " ms" << endl;
@@ -159,8 +199,8 @@ int main()
         {
           tInicio = clock();
           // cout << "Iniciando a BFS em matriz com inicio no vertice " << i << endl;
-          matrizInt.BFS(i, (inputFile+"_BFS_MatrizAdj_"+nomeSaida.str()).c_str(), log);
-          if (log == true)
+          matrizInt.BFS(i, (inputFile+"_BFS_MatrizAdj_"+nomeSaida.str()).c_str(), logFile);
+          if (logFile == true)
           {
             matrizInt.geraEstatisticas((inputFile+"_BFS_"+nomeSaida.str()).c_str());
             executionTime << "Tempo para rodar a BFS a partir do vértice " << i << ": " << (clock() - tInicio)/(CLOCKS_PER_SEC/1000) << " ms" << endl;
@@ -172,8 +212,8 @@ int main()
         {
           tInicio = clock();
           // cout << "Iniciando a DFS em matriz com inicio no vertice " << i << endl;
-          matrizInt.DFS(i, (inputFile+"_DFS_MatrizAdj_"+nomeSaida.str()).c_str(), log);
-          if (log == true)
+          matrizInt.DFS(i, (inputFile+"_DFS_MatrizAdj_"+nomeSaida.str()).c_str(), logFile);
+          if (logFile == true)
           {
             matrizInt.geraEstatisticas((inputFile+"_DFS_"+nomeSaida.str()).c_str());
             executionTime << "Tempo para rodar a BFS a partir do vértice " << i << ": " << (clock() - tInicio)/(CLOCKS_PER_SEC/1000) << " ms" << endl;
@@ -197,7 +237,7 @@ int main()
 
     //Inicia o timer
     ofstream executionTime;
-    executionTime.open((inputFile+"_log_listaAdj.txt").c_str());
+    executionTime.open((inputFile+"_logFile_listaAdj.txt").c_str());
     executionTime << "Tempo para iniciar o vetor: " << (clock() - tInicio)/(CLOCKS_PER_SEC/1000) << " ms" << endl;
 
     //BFS e DFS para cada ponto. Roda em paralelo caso seja escolhida a opção 2
@@ -214,8 +254,8 @@ int main()
         {
           tInicio = clock();
           // cout << "Iniciando a BFS em lista com inicio no vertice " << i << endl;
-          lista.BFS(i, (inputFile+"_BFS_ListaAdj_"+nomeSaida.str()).c_str(), log);
-          if (log == true)
+          lista.BFS(i, (inputFile+"_BFS_ListaAdj_"+nomeSaida.str()).c_str(), logFile);
+          if (logFile == true)
           {
             lista.geraEstatisticas((inputFile+"_BFS_"+nomeSaida.str()).c_str());
             executionTime << "Tempo para rodar a BFS a partir do vértice " << i << ": " << (clock() - tInicio)/(CLOCKS_PER_SEC/1000) << " ms" << endl;
@@ -227,8 +267,8 @@ int main()
         {
           tInicio = clock();
           // cout << "Iniciando a DFS em lista com inicio no vertice " << i << endl;
-          lista.DFS(i, (inputFile+"_DFS_ListaAdj_"+nomeSaida.str()).c_str(), log);
-          if (log == true)
+          lista.DFS(i, (inputFile+"_DFS_ListaAdj_"+nomeSaida.str()).c_str(), logFile);
+          if (logFile == true)
           {
             lista.geraEstatisticas((inputFile+"_DFS_"+nomeSaida.str()).c_str());
             executionTime << "Tempo para rodar a DFS a partir do vértice " << i << ": " << (clock() - tInicio)/(CLOCKS_PER_SEC/1000) << " ms" << endl;
@@ -250,8 +290,8 @@ int main()
         {
           tInicio = clock();
           cout << "Iniciando a BFS em lista com inicio no vertice " << i << endl;
-          listaInt.BFS(i, (inputFile+"_BFS_ListaAdj_"+nomeSaida.str()).c_str(), log);
-          if (log == true)
+          listaInt.BFS(i, (inputFile+"_BFS_ListaAdj_"+nomeSaida.str()).c_str(), logFile);
+          if (logFile == true)
           {
             listaInt.geraEstatisticas((inputFile+"_BFS_"+nomeSaida.str()).c_str());
             executionTime << "Tempo para rodar a BFS a partir do vértice " << i << ": " << (clock() - tInicio)/(CLOCKS_PER_SEC/1000) << " ms" << endl;
@@ -263,8 +303,8 @@ int main()
         {
           tInicio = clock();
           cout << "Iniciando a DFS em lista com inicio no vertice " << i << endl;
-          listaInt.DFS(i, (inputFile+"_DFS_ListaAdj_"+nomeSaida.str()).c_str(), log);
-          if (log == true)
+          listaInt.DFS(i, (inputFile+"_DFS_ListaAdj_"+nomeSaida.str()).c_str(), logFile);
+          if (logFile == true)
           {
             listaInt.geraEstatisticas((inputFile+"_DFS_"+nomeSaida.str()).c_str());
             executionTime << "Tempo para rodar a DFS a partir do vértice " << i << ": " << (clock() - tInicio)/(CLOCKS_PER_SEC/1000) << " ms" << endl;
@@ -318,4 +358,5 @@ int main()
     lista.carregar(inputFile);
     lista.diametro(inputFile);
   }
+  */
 }

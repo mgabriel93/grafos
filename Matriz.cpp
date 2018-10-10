@@ -56,7 +56,7 @@ Matriz::carregar(std::string arquivo, std::string ompSettings)
   }
 }
 
-Matriz::BFS(int inicio, std::string outputName, bool log)
+Matriz::BFS(int inicio, std::string outputName, bool logFile)
 {
   std::vector <bool> explorados; //Cria a lista de vértices explorados
   explorados.resize(nVertices); //Redimensiona a lista conforme necessário
@@ -84,7 +84,7 @@ Matriz::BFS(int inicio, std::string outputName, bool log)
   inicioStr << inicio; //Dá cast para string.....
 
   ofstream output;
-  if (log == true)
+  if (logFile == true)
   {
     output.open((outputName+".csv").c_str()); //Inicializa o arquivo
     output << "Vertice;Pai;Grau" << endl; //Adiciona o título
@@ -108,7 +108,7 @@ Matriz::BFS(int inicio, std::string outputName, bool log)
           fila.push_back(i); //Adiciona na fila
           nivel[i] = nivel[v] + 1; //O nível dele será o nível de quem descobiru ele +1
           pai[i] = v; //O pai dele será quem o descobriu
-          if (log == true)
+          if (logFile == true)
           {
             output << i << ";" << pai[i] << ";" << nivel[i] << endl; //Adiciona a linha no arquivo
           }
@@ -116,14 +116,14 @@ Matriz::BFS(int inicio, std::string outputName, bool log)
       }
     }
   }
-  if (log == true)
+  if (logFile == true)
   {
     output.close(); //Fecha o arquivo
   }
   // cout << "BFS executada com sucesso!" << endl;
 }
 
-Matriz::DFS(int inicio, std::string outputName, bool log)
+Matriz::DFS(int inicio, std::string outputName, bool logFile)
 {
   std::vector <bool> explorados; //Cria a lista de vértices explorados
   explorados.resize(nVertices); //Redimensiona a lista conforme necessário
@@ -151,7 +151,7 @@ Matriz::DFS(int inicio, std::string outputName, bool log)
   inicioStr << inicio; //Dá cast para string.....
 
   ofstream output;
-  if (log == true)
+  if (logFile == true)
   {
     output.open((outputName+".csv").c_str()); //Inicializa o arquivo
     output << "Vertice;Pai;Grau" << endl; //Adiciona o título
@@ -175,7 +175,7 @@ Matriz::DFS(int inicio, std::string outputName, bool log)
           fila.push_back(i); //Adiciona na fila
           nivel[i] = nivel[v] + 1; //O nível dele será o nível de quem descobiru ele +1
           pai[i] = v; //O pai dele será quem o descobriu
-          if (log == true)
+          if (logFile == true)
           {
               output << i << ";" << pai[i] << ";" << nivel[i] << endl; //Adiciona a linha no arquivo
           }
@@ -183,7 +183,7 @@ Matriz::DFS(int inicio, std::string outputName, bool log)
       }
     }
   }
-  if (log == true)
+  if (logFile == true)
   {
     output.close(); //Fecha o arquivo
   }
